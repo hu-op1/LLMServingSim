@@ -513,13 +513,13 @@ class MemoryModel():
             # includes the new leaves before we evict (otherwise eviction
             # may try to free more bytes than are currently tracked).
             self.apply_kv_cache_events()
-            # After unlocking, aggressively evict evictable nodes to create
-            # headroom.  This is the primary mechanism that prevents the
-            # radix tree from filling NPU memory: every finished request
-            # unlocks its prefix, and we immediately evict whatever we can.
-            if self.npu_prefix_cache.evictable_size() > 0:
-                evictable_bytes = self.npu_prefix_cache.evictable_size() * self._bytes_per_token
-                self.evict_prefix_cache(evictable_bytes, Device.NPU)
+            # After unlocking, eviction is deferred to schedule-time OOM
+            # handling (schedule_with_prefix), matching vLLM's lazy eviction
+            # strategy where cached blocks persist until memory pressure
+            # forces reclamation.
+            # if self.npu_prefix_cache.evictable_size() > 0:
+            #     evictable_bytes = self.npu_prefix_cache.evictable_size() * self._bytes_per_token
+            #     self.evict_prefix_cache(evictable_bytes, Device.NPU)
             return  # evict_prefix_cache already called apply_kv_cache_events
         elif device == Device.CPU or device == Device.CXL:
             self.second_tier_prefix_cache.cache_finished_req(req)
