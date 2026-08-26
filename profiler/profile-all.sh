@@ -1,7 +1,6 @@
 #!/bin/bash
-# Sweep the profiler over Qwen3-32B, Qwen3-30B-A3B-Instruct-2507, and
-# Llama-3.1-8B at TP=1 and TP=2. Run from inside the vLLM Docker
-# (launched via scripts/docker-vllm.sh) at /workspace:
+# Sweep the profiler over every model in MODELS below. Run from inside
+# the vLLM Docker (launched via scripts/docker-vllm.sh) at /workspace:
 #
 #     ./profiler/profile-all.sh
 #
@@ -34,6 +33,7 @@ MODELS=(
     #  "meta-llama/Llama-3.1-8B"
     # "meta-llama/Llama-2-7b-hf"
     #  "meta-llama/Llama-2-13b-hf"
+    "bigcode/starcoder2-3b"  # NB: only 2 KV heads -> TP must stay in {1,2}
 )
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
