@@ -23,12 +23,15 @@ set -euo pipefail
 # from the Hub; an explicit .json path must already exist locally.
 # The profiler reads model_type from that config to pick an
 # architecture yaml under profiler/models/.
-# MODEL="meta-llama/Llama-3.1-8B"
-MODEL="Qwen/Qwen3-32B"
+# Fork-local target. Alternatives with local profiles:
+#   "Qwen/Qwen3-4B"  "meta-llama/Llama-3.1-8B-Instruct"
+#   "Qwen/Qwen3-30B-A3B-Instruct-2507"  "bigcode/starcoder2-3b"
+MODEL="Qwen/Qwen3-8B"
 
 # GPU identifier used as an output folder name under ``perf/``.
 # Free-form — pick something meaningful for your hardware.
-HARDWARE="RTXPRO6000"
+# Local perf trees exist for: RTX3090, RTX3080, A100-40GB, RTX4090.
+HARDWARE="RTX3090"
 
 # =============================================================================
 # EDIT THESE (OPTIONAL — uncomment and adjust as needed)

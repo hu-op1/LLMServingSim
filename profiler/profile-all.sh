@@ -20,7 +20,7 @@
 
 set -uo pipefail          # not -e: one model failing should not lose the rest
 
-HARDWARE="${HARDWARE:-RTXPRO6000}"
+HARDWARE="${HARDWARE:-RTX3090}"
 
 # --- Which models, and what each one needs ----------------------------------
 # TP is per job. For a **dense** model TP is the only way to shard, so both
@@ -29,15 +29,30 @@ HARDWARE="${HARDWARE:-RTXPRO6000}"
 # max-DP layout runs every instance at tp_size=1 and only tp1/ is ever read.
 # Adding TP there costs hours and buys nothing until you actually simulate a
 # TP x DP mix.
+#
+# Fork-local list: the models this fork has profiles for (perf/RTX3090,
+# perf/RTX3080, perf/A100-40GB). Upstream's list targets RTXPRO6000 and is
+# kept commented at the bottom for reference.
 JOBS=(
-    "meta-llama/Llama-3.1-8B|--tp 1,2"
-    "Qwen/Qwen3-32B|--tp 1,2"
-    "Qwen/Qwen3-30B-A3B-Instruct-2507|--tp 1,2"
-    "Qwen/Qwen3.8-27B|--tp 1,2"
-    "deepseek-ai/DeepSeek-V3.2-Exp|--tp 1"
-    "zai-org/GLM-5|--tp 1"
-    "MiniMaxAI/MiniMax-M3|--tp 1 --block-size 128"
+    "Qwen/Qwen3-1.7B|--tp 1,2,4"          # 1.7B: tp>4 buys nothing
+    "Qwen/Qwen3-4B|--tp 1,2,4,8"
+    "Qwen/Qwen3-8B|--tp 1,2,4,8"
+    "Qwen/Qwen3-30B-A3B-Instruct-2507|--tp 1"
+    "meta-llama/Llama-3.1-8B-Instruct|--tp 1,2,4,8"
+    "bigcode/starcoder2-3b|--tp 1,2"      # only 2 KV heads -> TP in {1,2}
+    # "meta-llama/Llama-2-7b-hf|--tp 1,2,4,8,16"
+    # "meta-llama/Llama-2-13b-hf|--tp 1,2,4,8"
 )
+# Upstream v1.2.0 list (RTXPRO6000 hardware):
+# JOBS=(
+#     "meta-llama/Llama-3.1-8B|--tp 1,2"
+#     "Qwen/Qwen3-32B|--tp 1,2"
+#     "Qwen/Qwen3-30B-A3B-Instruct-2507|--tp 1,2"
+#     "Qwen/Qwen3.8-27B|--tp 1,2"
+#     "deepseek-ai/DeepSeek-V3.2-Exp|--tp 1"
+#     "zai-org/GLM-5|--tp 1"
+#     "MiniMaxAI/MiniMax-M3|--tp 1 --block-size 128"
+# )
 
 # --- Globals (every one is a profile.sh variable of the same name) -----------
 MAX_NUM_BATCHED_TOKENS="${MAX_NUM_BATCHED_TOKENS:-2048}"
