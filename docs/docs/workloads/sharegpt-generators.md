@@ -56,6 +56,7 @@ the container, see
 | --- | --- | --- |
 | `--model` | (required) | HuggingFace model id; used for tokenization (and optionally free-generation) |
 | `--source` | `shibing624/sharegpt_gpt4` | HF dataset id or local path. Any dataset with `conversations` field works |
+| `--output` | (required) | Output JSONL path |
 
 ### Sampling
 
@@ -64,7 +65,7 @@ the container, see
 | `--num-reqs` | (required) | How many requests / sessions to emit |
 | `--sps` | (required) | Sessions per simulated second (Poisson arrival) |
 | `--seed` | `42` | RNG seed for sampling and arrival times |
-| `--first-arrival-sec` | `0` | Offset for the first request's arrival time |
+| `--first-arrival-sec` | `0` | Initial arrival-clock offset; Poisson mode also adds an inter-arrival gap before the first request |
 
 ### Length filters
 
@@ -93,9 +94,10 @@ For controlled stress tests, fix the prompt and output lengths:
 | `--fix-input-length` | `128` | Prompt tokens |
 | `--fix-output-length` | `512` | Output tokens |
 
-In this mode, the generator still pulls real conversations from the
-source dataset for prefix-cache realism, but truncates / pads each
-to the fixed lengths.
+This mode generates random input and output token IDs from the tokenizer's
+vocabulary. It does not read, truncate or pad source conversations, so it
+does not preserve their prefix-sharing structure. `--use-vllm` is skipped
+in this mode.
 
 ### Pulse arrival pattern
 
@@ -106,7 +108,7 @@ the API at the top of the hour" production phenomenon:
 | --- | --- | --- |
 | `--pulse` | off | Enable pulse mode |
 | `--pulse-n` | `10` | Number of requests per pulse |
-| `--pulse-delay-sec` | `60` | Time between pulses |
+| `--pulse-delay-sec` | `60` | Gap from the last request of one pulse to the first request of the next |
 | `--pulse-poisson` | off | Within each pulse, use Poisson arrivals at the configured `--sps` instead of all-at-once |
 
 Without `--pulse-poisson`, pulse arrivals all fire at the start of
@@ -122,8 +124,27 @@ matching the model you'll run in the simulator:
 | Flag | Default | Meaning |
 | --- | --- | --- |
 | `--use-vllm` | off | Use vLLM to free-generate outputs |
-| `--vllm-tp` | `1` | TP degree for vLLM |
+| `--vllm-tp` | `1` | `tensor_parallel_size` for the offline engine |
 | `--vllm-dtype` | `bfloat16` | vLLM weight dtype |
+| `--vllm-max-num-seqs` | `1024` | `max_num_seqs`. Deliberately high — this is a throughput job, not a latency measurement |
+| `--vllm-max-num-batched-tokens` | `16384` | `max_num_batched_tokens`, likewise high for throughput |
+| `--vllm-max-model-len` | model's max | Override `max_model_len` |
+| `--vllm-temperature` | `0.0` | Sampling temperature. `0` = greedy, which makes generation reproducible for a given seed |
+| `--vllm-repetition-penalty` | `1.1` | Down-weights already-emitted tokens. `1.0` disables it |
+
+:::note[Why the repetition penalty defaults above 1.0]
+Free generation at `1.0` tends to ramble past the natural stopping
+point, so EOS never fires and every request runs to
+`--max-output-toks`. `1.1` keeps natural EOS landing at typical
+ShareGPT lengths (~500–1000 tokens), which is what makes the resulting
+output-length distribution look like the real dataset's.
+:::
+
+The five `--vllm-*` engine knobs above are throughput settings for the
+generation job itself. They have **no** bearing on the simulated run:
+the generator only records token counts and ids, so `--vllm-max-num-seqs
+1024` here does not mean the workload should be simulated at
+`--max-num-seqs 1024`.
 
 With `--use-vllm`:
 
@@ -135,8 +156,8 @@ With `--use-vllm`:
 Without `--use-vllm`:
 
 - Both prompt and response come from the ShareGPT entry as text.
-- Only the prompt is re-tokenized with `--model`'s tokenizer for
-  `input_tok_ids`.
+- Both prompt and assistant response are tokenized with `--model`'s
+  tokenizer for `input_tok_ids` and `output_tok_ids`.
 
 Use `--use-vllm` when you specifically want output token IDs to
 match what the model would actually produce. For most simulator
