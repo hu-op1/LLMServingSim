@@ -28,6 +28,10 @@ class Request:
         self.prefix_cache_hit = 0
         self.npu_cache_hit = 0
         self.storage_cache_hit = 0
+        # Guards prefix-cache hit stats: cache_unfinished_req() runs on every
+        # chunk/decode step, so without this a chunked-prefill request would
+        # be counted once per chunk in radix cache hit-ratio metrics.
+        self._prefix_stats_counted = False
         self.npu_last_node = None
         self.cpu_last_node = None
         self.storage_last_node = None

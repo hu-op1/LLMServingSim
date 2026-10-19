@@ -303,8 +303,12 @@ class RadixCache():
             new_prefix_len = self.insert(insert_token_ids)
             # print("[radix_tree: insert()] req_id: {}, insert_len: {}, total_size_after: {}, new_prefix_len: {}".format(req.id, len(insert_token_ids), self.total_size(), new_prefix_len))
 
-            # Track prefix cache stats on first insert (is_init=True, before it's cleared)
-            if req.is_init and update:
+            # Track prefix cache stats once per request. cache_unfinished_req()
+            # is called on every chunk/decode step while is_init may still be
+            # True (chunked prefill keeps it set until the final chunk), so
+            # guard against counting the same prompt multiple times.
+            if req.is_init and update and not req._prefix_stats_counted:
+                req._prefix_stats_counted = True
                 self.total_requested_tokens += req.original_input
                 if self.device == 'NPU':
                     self.total_hit_tokens += req.npu_cache_hit
