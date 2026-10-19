@@ -1,0 +1,29 @@
+{
+  "num_nodes": 1,
+  "link_bw": 9.7,
+  "link_latency": 6910,
+  "nodes": [
+    {
+      "num_instances": 1,
+      "cpu_mem": {
+        "mem_size": 512,
+        "mem_bw": 52.4,
+        "mem_latency": 112.7
+      },
+      "instances": [
+        {
+          "model_name": "microsoft/Phi-4-mini-instruct",
+          "hardware": "A100-SXM4-40GB",
+          "npu_mem": {
+            "mem_size": 34,
+            "mem_bw": 1400.9,
+            "mem_latency": 0
+          },
+          "num_npus": 1,
+          "tp_size": 1,
+          "pd_type": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+# Phi-3 / Phi-4-mini family — class catalog (dense decoder-only LLMs).
+#
+# Covers the Phi-3 and Phi-4-mini ``Phi3ForCausalLM`` checkpoints. In
+# vLLM 0.19 ``Phi3ForCausalLM`` inherits ``LlamaForCausalLM`` almost
+# verbatim (only ``packed_modules_mapping`` is overridden), so the
+# per-block classes are the Llama ones: ``LlamaModel`` /
+# ``LlamaDecoderLayer`` / ``LlamaAttention`` / ``LlamaMLP`` with
+# RMSNorm and a SwiGLU MLP. The differences from ``llama.yaml`` are:
+#
+#   * Rotary embedding is Phi-3 LongRoPE
+#     (``rope_scaling.type == "longrope"`` with short/long factors and
+#     ``partial_rotary_factor: 0.75``), which vLLM instantiates as
+#     ``Phi3LongRoPEScaledRotaryEmbedding`` rather than
+#     ``RotaryEmbedding`` / ``Llama3RotaryEmbedding``.
+#   * The top-level class reported by vLLM is ``Phi3ForCausalLM``, not
+#     ``LlamaForCausalLM`` (see ``final_layernorm.within``).
+#   * Phi-4-mini ties embedding and lm_head weights; that changes the
+#     parameter count but not the module/class structure.
+#
+# ``sliding_window`` in the HF config exceeds ``max_position_embeddings``
+# and there are no per-layer ``layer_types``, so attention uses the
+# standard full-context ``Attention`` module.
+#
+# Canonical layer names mirror vLLM's attribute names (see
+# ../vllm/vllm/model_executor/models/phi3.py and llama.py).
+#
+# ``sequence:`` describes the ordered pipeline the simulator's
+# trace_generator walks to emit one iteration. Names must appear in
+# ``catalog`` below. TP ALLREDUCE (after ``o_proj`` / ``down_proj``)
+# and EP ALLTOALL (around ``moe``) are attached by the simulator from
+# cluster config and need not be listed here.
+
+
+sequence:
+  prologue:  [embedding]
+  pre_attn:  [layernorm, qkv_proj, rotary_emb, attention]
+  post_attn: [o_proj, layernorm]
+  mlp_dense: [gate_up_proj, act_fn, down_proj]
+  mlp_moe:   []
+  head:      [final_layernorm, lm_head, sampler]
+
+
+catalog:
+  dense:
+    embedding:
+      vllm: VocabParallelEmbedding
+    layernorm:
+      vllm: RMSNorm
+      within: LlamaDecoderLayer
+      tp_stable: true
+    qkv_proj:
+      vllm: QKVParallelLinear
+    rotary_emb:
+      vllm: Phi3LongRoPEScaledRotaryEmbedding
+    o_proj:
+      vllm: RowParallelLinear
+      within: LlamaAttention
+    gate_up_proj:
+      vllm: MergedColumnParallelLinear
+      within: LlamaMLP
+    act_fn:
+      vllm: SiluAndMul
+    down_proj:
+      vllm: RowParallelLinear
+      within: LlamaMLP
+    final_layernorm:
+      vllm: RMSNorm
+      within: Phi3ForCausalLM
+      tp_stable: true
+  per_sequence:
+    lm_head:
+      vllm: LogitsProcessor
+    sampler:
+      vllm: Sampler
+      tp_stable: true
+  attention:
+    attention:
+      vllm: Attention

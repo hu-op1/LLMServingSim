@@ -24,6 +24,7 @@ and compare against the bundled architectures:
 | `qwen3_moe` | `qwen3_moe.yaml` | Qwen3 MoE (30B-A3B, 235B-A22B) |
 | `mixtral` | `mixtral.yaml` | `MixtralForCausalLM` (8x7B, 8x22B) |
 | `phimoe` | `phimoe.yaml` | `PhiMoEForCausalLM` (Phi-3.5-MoE) |
+| `phi3` | `phi3.yaml` | `Phi3ForCausalLM` (Phi-3, Phi-4-mini, LongRoPE) |
 
 If your `model_type` is one of these, you don't need to do anything
 - the existing YAML handles it.

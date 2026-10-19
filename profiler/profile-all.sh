@@ -34,6 +34,7 @@ MODELS=(
     # "meta-llama/Llama-2-7b-hf"
     #  "meta-llama/Llama-2-13b-hf"
     "bigcode/starcoder2-3b"  # NB: only 2 KV heads -> TP must stay in {1,2}
+    #"microsoft/Phi-4-mini-instruct"  # NB: 8 KV heads -> TP in {1,2,4,8}
 )
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
