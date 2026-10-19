@@ -1,0 +1,15 @@
+layer,decode_q_len,pc_label,lev_label,n_anchor,alpha,direct_rows,pooled_rows
+attention,1,pc1,lev0,16,1.0,99,110
+attention,1,pc1,lev0,128,1.0,83,83
+attention,1,pc1,lev1,128,1.0,34,62
+attention,1,pc1,lev2,16,1.0,22,22
+attention,1,pc1,lev2,128,1.0,40,40
+attention,1,pc1,lev3,16,1.0,20,20
+attention,1,pc1,lev3,128,1.0,81,81
+attention,1,pc2,lev0,16,1.0,41,43
+attention,1,pc2,lev0,128,1.0,44,44
+attention,1,pc2,lev1,128,1.0,28,38
+attention,1,pc2,lev3,128,1.0,35,44
+attention,1,pc3,lev0,16,1.0,34,41
+attention,1,pc3,lev0,128,1.0,58,58
+attention,1,pc3,lev3,128,1.0,28,33
