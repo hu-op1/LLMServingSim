@@ -10,11 +10,11 @@
 
 set -euo pipefail
 
-HARDWARE="${HARDWARE:-RTX3090}"
-TP_DEGREES="${TP_DEGREES:-1,2,4,8}"
-MAX_NUM_BATCHED_TOKENS="${MAX_NUM_BATCHED_TOKENS:-32768}"
+HARDWARE="${HARDWARE:-A100-SXM4-40GB}"
+TP_DEGREES="${TP_DEGREES:-1,4}"
+MAX_NUM_BATCHED_TOKENS="${MAX_NUM_BATCHED_TOKENS:-2048}"
 MAX_NUM_SEQS="${MAX_NUM_SEQS:-256}"
-ATTENTION_MAX_KV="${ATTENTION_MAX_KV:-40960}"
+ATTENTION_MAX_KV="${ATTENTION_MAX_KV:-131072}"
 ATTENTION_CHUNK_FACTOR="${ATTENTION_CHUNK_FACTOR:-2.0}"
 ATTENTION_KV_FACTOR="${ATTENTION_KV_FACTOR:-2.0}"
 # Timed forwards per shot (averaged). N=3 tames single-sample DVFS
@@ -27,14 +27,15 @@ SKEW_KP_FACTOR="${SKEW_KP_FACTOR:-4.0}"
 SKEW_KVS_FACTOR="${SKEW_KVS_FACTOR:-4.0}"
 
 MODELS=(
-    # "Qwen/Qwen3-4B"
+    "Qwen/Qwen3-4B"
     "Qwen/Qwen3-8B"
-     "Qwen/Qwen3-30B-A3B-Instruct-2507"
-    #  "meta-llama/Llama-3.1-8B"
+    "Qwen/Qwen3-32B"
+    "Qwen/Qwen3-30B-A3B-Instruct-2507"
+    "meta-llama/Llama-3.1-8B"
     # "meta-llama/Llama-2-7b-hf"
     #  "meta-llama/Llama-2-13b-hf"
-    "bigcode/starcoder2-3b"  # NB: only 2 KV heads -> TP must stay in {1,2}
-    #"microsoft/Phi-4-mini-instruct"  # NB: 8 KV heads -> TP in {1,2,4,8}
+    #"bigcode/starcoder2-3b"  # NB: only 2 KV heads -> TP must stay in {1,2}
+    "microsoft/Phi-4-mini-instruct"  # NB: 8 KV heads -> TP in {1,2,4,8}
 )
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

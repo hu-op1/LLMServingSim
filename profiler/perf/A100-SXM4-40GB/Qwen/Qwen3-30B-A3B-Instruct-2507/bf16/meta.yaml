@@ -3,7 +3,7 @@ vllm_version: 0.19.0
 cuda_version: '12.9'
 gpu: NVIDIA A100-SXM4-40GB
 hardware: A100-SXM4-40GB
-profiled_at: '2026-10-19T10:45:38+00:00'
+profiled_at: '2026-10-21T15:51:10+00:00'
 architecture: qwen3_moe
 architecture_sha256: 784ed86cdd6b8a71c1c8cc82a5af96e49a70607e40ac8570b7b9341eb3dc5800
 model: Qwen/Qwen3-30B-A3B-Instruct-2507
@@ -27,7 +27,7 @@ engine_effective:
     num_key_value_heads: 1
     vocab_size: 37984
   worker_extension_cls: profiler.core.hooks.extension.Extension
-  model: /tmp/profiler_model_ytrfbkcp
+  model: /tmp/profiler_model_ig2u5g_k
 attention_grid:
   max_kv: 131072
   chunk_factor: 2.0

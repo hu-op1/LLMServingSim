@@ -3,7 +3,7 @@ vllm_version: 0.19.0
 cuda_version: '12.9'
 gpu: NVIDIA A100-SXM4-40GB
 hardware: A100-SXM4-40GB
-profiled_at: '2026-10-19T12:25:07+00:00'
+profiled_at: '2026-10-21T15:51:40+00:00'
 architecture: llama
 architecture_sha256: 19d708000ec8a89edf1ca12dd388235b2cfe59007aaec6ea48702fb856ff2cfb
 model: meta-llama/Llama-3.1-8B
@@ -27,7 +27,7 @@ engine_effective:
     num_key_value_heads: 2
     vocab_size: 32064
   worker_extension_cls: profiler.core.hooks.extension.Extension
-  model: /tmp/profiler_model_izsfcawg
+  model: /tmp/profiler_model_r_qghucd
 attention_grid:
   max_kv: 131072
   chunk_factor: 2.0
